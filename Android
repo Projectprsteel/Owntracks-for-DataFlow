@@ -1,0 +1,311 @@
+[
+    {
+        "id": "6b4abbeb.aa1bb4",
+        "type": "subflow",
+        "name": "Waypoint Subflow",
+        "info": "",
+        "in": [
+            {
+                "x": 71.99999809265137,
+                "y": 99,
+                "wires": [
+                    {
+                        "id": "ee52d22a.05bdf"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 1025.9999523162842,
+                "y": 74,
+                "wires": [
+                    {
+                        "id": "8353a893.3b6c38",
+                        "port": 0
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "b3f79dd0.a0b68",
+        "type": "debug",
+        "z": "6b4abbeb.aa1bb4",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "true",
+        "x": 683.875,
+        "y": 33,
+        "wires": []
+    },
+    {
+        "id": "79fb0fad.a2657",
+        "type": "dataflow-request",
+        "z": "6b4abbeb.aa1bb4",
+        "name": "",
+        "method": "use",
+        "endpoint": "",
+        "x": 585.65625,
+        "y": 114,
+        "wires": [
+            [
+                "b3f79dd0.a0b68",
+                "8353a893.3b6c38"
+            ]
+        ]
+    },
+    {
+        "id": "8353a893.3b6c38",
+        "type": "function",
+        "z": "6b4abbeb.aa1bb4",
+        "name": "",
+        "func": "//var properties = context.global.properties;\n//use the data retained to update object data look for msg.command in the debug\nmsg.payload = {\n    object : msg.originalPayload.desc, // for example\n    class : \"waypoint\", //context.global.properties._class, \n    timestamp : new Date().toISOString(),\n    data : {\n        location : {\n            longitude : msg.originalPayload.lon,\n            latitude : msg.originalPayload.lat\n        },\n        waypointRadius : msg.originalPayload.rad,\n        waypointCreationTimestamp : msg.originalPayload.tst,\n    }\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "dependencies": [],
+        "x": 840.875,
+        "y": 109.00000095367432,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ee52d22a.05bdf",
+        "type": "function",
+        "z": "6b4abbeb.aa1bb4",
+        "name": "",
+        "func": "//var properties = context.global.properties;\n//retain payload data for use later\nmsg.originalPayload = Object.assign({},msg.payload);\nlet wayname = msg.payload.desc;\n//create a new region based on name in desc\nmsg.endpoint = '/objects/' +\n            context.global.properties._org + '/' +\n            context.global.properties._project + '~' + context.global.properties._env + \"/\" + //delete \"~dev\" if you promote to production\n            \"waypoint\" + \"/\" + \n            wayname.replace(/\\s/g, \"\");\n                 \nmsg.method = 'PUT';\n\nmsg.payload = {};\nmsg.headers = {};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "dependencies": [],
+        "x": 336,
+        "y": 115,
+        "wires": [
+            [
+                "79fb0fad.a2657",
+                "ea866e0c.629ca"
+            ]
+        ]
+    },
+    {
+        "id": "ea866e0c.629ca",
+        "type": "debug",
+        "z": "6b4abbeb.aa1bb4",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "true",
+        "x": 389.3333282470703,
+        "y": 45.55555534362793,
+        "wires": []
+    },
+    {
+        "id": "53a0f505.ad225c",
+        "type": "tab",
+        "label": "Android"
+    },
+    {
+        "id": "3bc4d68e.b7d29a",
+        "type": "http in",
+        "z": "53a0f505.ad225c",
+        "name": "",
+        "url": "/AndroidPhone",
+        "method": "post",
+        "username": null,
+        "password": null,
+        "authType": "noAuth",
+        "useAuth": false,
+        "useOauth": false,
+        "encryption": "none",
+        "realm": "",
+        "clientId": null,
+        "clientSecret": null,
+        "site": "",
+        "authorizationPath": "/oauth/authorize",
+        "tokenPath": "/oauth/access_token",
+        "scope": "",
+        "encryptObj": [
+            "username",
+            "password",
+            "clientId",
+            "clientSecret"
+        ],
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 280,
+        "wires": [
+            [
+                "719f7b1.eb08284",
+                "ced35dc0.f5e76"
+            ]
+        ]
+    },
+    {
+        "id": "719f7b1.eb08284",
+        "type": "debug",
+        "z": "53a0f505.ad225c",
+        "name": "Raw Owntracks JSON",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 180,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "f79f4dc0.5d1e",
+        "type": "debug",
+        "z": "53a0f505.ad225c",
+        "name": "DataFlow Confirmation",
+        "active": true,
+        "console": "false",
+        "complete": "true",
+        "x": 1040,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "9c0b2c8d.c433e",
+        "type": "dataflow-out",
+        "z": "53a0f505.ad225c",
+        "name": "",
+        "x": 1015.0000228881836,
+        "y": 276.0000114440918,
+        "wires": [
+            [
+                "f79f4dc0.5d1e",
+                "bca82788.d60328"
+            ]
+        ]
+    },
+    {
+        "id": "fb8375db.19d128",
+        "type": "debug",
+        "z": "53a0f505.ad225c",
+        "name": "Preperation for DataFlow",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 690,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "bca82788.d60328",
+        "type": "http response",
+        "z": "53a0f505.ad225c",
+        "name": "",
+        "x": 1262.0000534057617,
+        "y": 276.0000114440918,
+        "wires": []
+    },
+    {
+        "id": "ced35dc0.f5e76",
+        "type": "switch",
+        "z": "53a0f505.ad225c",
+        "name": "_type decision",
+        "property": "payload._type",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "location",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "transition",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "waypoint",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "outputs": 4,
+        "x": 403.00013732910156,
+        "y": 281.00000762939453,
+        "wires": [
+            [
+                "8377f81c.fafd48"
+            ],
+            [
+                "5f7291.bef30d7"
+            ],
+            [
+                "5c479b3d.a9b504"
+            ],
+            [
+                "4ef95d85.0ae764"
+            ]
+        ]
+    },
+    {
+        "id": "5f7291.bef30d7",
+        "type": "function",
+        "z": "53a0f505.ad225c",
+        "name": "Transition Update",
+        "func": "let geofenceReport = msg.payload.event + \"-\" + msg.payload.desc;\nmsg.payload = {\n    object : msg.payload.tid,\n    class : context.global.properties._class, \n    timestamp : new Date().toISOString(),\n    data : {\n        location : {\n            longitude : msg.payload.lon,\n            latitude : msg.payload.lat\n        },\n        transitionReportingAccuracy : msg.payload.acc,\n        reportTrigger : msg.payload.t,\n        locationFixTs : msg.payload.tst,\n        regionEvent : geofenceReport,\n    }\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "dependencies": [],
+        "x": 668.5250549316406,
+        "y": 270.0000057220459,
+        "wires": [
+            [
+                "9c0b2c8d.c433e",
+                "fb8375db.19d128"
+            ]
+        ]
+    },
+    {
+        "id": "5c479b3d.a9b504",
+        "type": "subflow:6b4abbeb.aa1bb4",
+        "z": "53a0f505.ad225c",
+        "name": "",
+        "x": 665.0001525878906,
+        "y": 318.0000057220459,
+        "wires": [
+            [
+                "9c0b2c8d.c433e"
+            ]
+        ]
+    },
+    {
+        "id": "4ef95d85.0ae764",
+        "type": "debug",
+        "z": "53a0f505.ad225c",
+        "name": "Other Messages",
+        "active": true,
+        "console": "false",
+        "complete": "true",
+        "x": 665.0000991821289,
+        "y": 370.0000066757202,
+        "wires": []
+    },
+    {
+        "id": "8377f81c.fafd48",
+        "type": "function",
+        "z": "53a0f505.ad225c",
+        "name": "Location Update",
+        "func": "/**\n* @description - Prepares incoming data to be stored into DataFlow Registry on normal updates\n* @constructor - All part of the \"phone\" object class\n* @param inrs - Not always present in payload, but wanted to add some sort of data to registry\n* @param tid - this is the two digit string that identifies the phone\n* @param timestamp - not provided in payload, that is why we are doing it here\n*/\n\nlet inrs;\nif (msg.payload.hasOwnProperty('inregions')) {\n    inrs = msg.payload.inregions[0]; \n} else {\n    inrs = \"not reported\";\n}\n\nmsg.payload = {\n    object : msg.payload.tid,\n    class : context.global.properties._class, \n    timestamp : new Date().toISOString(),\n    data : {\n        location : {\n            longitude : msg.payload.lon,\n            latitude : msg.payload.lat,\n            altitude : msg.payload.alt\n        },\n        reportAccuracy : msg.payload.acc,\n        deviceBattery : msg.payload.batt,\n        connStatus : msg.payload.conn,\n        reportTrigger : msg.payload.t,\n        verticalAccuracy : msg.payload.vac,\n        velocity : msg.payload.vel,\n        locationFixTs : msg.payload.tst,\n        currentRegion : inrs,\n        \n    }\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "dependencies": [],
+        "x": 669.3459014892578,
+        "y": 210.88889837265015,
+        "wires": [
+            [
+                "9c0b2c8d.c433e",
+                "fb8375db.19d128"
+            ]
+        ]
+    }
+]
